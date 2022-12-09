@@ -4,20 +4,18 @@
     <div class="row">
         <div class="col-lg-8  offset-lg-2">
             <h2 class="mt-5">Registation</h2>
-			<div class="topnav">
-			<a class="active" href="{{ url_for('register')}}">Register</a>
-			</div>
 			<form method="post" action="{{ url_for('register') }}">
-			  <label for="fname">First name:</label>
-			  <input type="text" id="fname" name="fname"><br><br>
-			  <label for="lname">Last name:</label>
-			  <input type="text" id="lname" name="lname"><br><br>
-				<label for="bday">First name:</label>
-			  <input type="date" id="bday" name="bday"><br><br>
-			  <label for="email">Email:</label>
-			  <input type="email" id="email" name="email"><br><br>
-			  <input type="submit" value="Submit">
+			<label for="fname">First name:</label>
+			<input type="text" id="fname" name="fname"><br><br>
+			<label for="lname">Last name:</label>
+			<input type="text" id="lname" name="lname"><br><br>
+			<label for="bday">Date of birth:</label>
+			<input type="date" id="bday" name="bday"><br><br>
+			<label for="email">Email:</label>
+			<input type="email" id="email" name="email"><br><br>
+			<input type="submit" value="Submit">
 			<input type="submit" value="Capture" name="click"/>
+			<input type="submit" value="Back" name="back">
 			</form>
             <img src="{{ url_for('video_feed') }}" height="80%">
 <!--			<h3 style="font-family:courier;">Instructions:</h3>-->
@@ -31,4 +29,7 @@
         </div>
     </div>
 </div>
+			<div class="topnav">
+			<a class="active" href="http://127.0.0.1:5000/">Back to Home</a>
+			</div>
 </body>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response, request
+from flask import Flask, render_template, Response, request, redirect, url_for
 import cv2
 import datetime, time
 import os, sys
@@ -10,7 +10,7 @@ import face_recognition
 images_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/images_db"
 info_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/info_db"
 
-global capture, rec_frame, grey, switch, neg, face, out
+global capture, rec_frame, grey, switch, neg, face, out, ima_name
 capture = 0
 grey = 0
 neg = 0
@@ -103,7 +103,7 @@ def gen_frames():  # generate frame by frame from camera
                 frame = cv2.bitwise_not(frame)
             if (capture):
                 capture = 0
-                file_name = "arthit"
+                file_name = ima_name
                 p = os.path.sep.join(['images_db', "{}.png".format(str(file_name))])
                 cv2.imwrite(p, frame)
 
@@ -133,11 +133,12 @@ def register():
     global switch, camera
     if request.method == 'POST':
         if request.form.get('click') == 'Capture':
-            global capture
-            capture = 1
-        elif request.form.get('grey') == 'Grey':
-            global grey
-            grey = not grey
+            global capture, ima_name
+            ima_name = request.form.get("fname")
+            if len(ima_name)>0:
+                capture = 1
+        elif request.form.get('back') == 'Back':
+            return redirect("/")
         elif request.form.get('neg') == 'Negative':
             global neg
             neg = not neg
@@ -165,28 +166,11 @@ def register():
 def tasks():
     global switch, camera
     if request.method == 'POST':
-        if request.form.get('click') == 'Capture':
-            global capture
-            capture = 1
-        elif request.form.get('grey') == 'Grey':
-            global grey
-            grey = not grey
-        elif request.form.get('neg') == 'Negative':
-            global neg
-            neg = not neg
-        elif request.form.get('face') == 'Face Detection':
+        if request.form.get('face') == 'Start/Stop Scan':
             global face
             face = not face
-        elif request.form.get('stop') == 'Stop/Start':
-
-            if (switch == 1):
-                switch = 0
-                camera.release()
-                cv2.destroyAllWindows()
-
-            else:
-                camera = cv2.VideoCapture(0)
-                switch = 1
+        elif request.form.get('regis') == 'Register':
+            return redirect(url_for("register"))
 
 
     elif request.method == 'GET':
