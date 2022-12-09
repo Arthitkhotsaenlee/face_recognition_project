@@ -41,33 +41,7 @@ for i in know_list:
     known_face_names.append(name)
 
 
-# def detect_face(frame):
-#     global net
-#     (h, w) = frame.shape[:2]
-#     blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0,
-#                                  (300, 300), (104.0, 177.0, 123.0))
-#     net.setInput(blob)
-#     detections = net.forward()
-#     confidence = detections[0, 0, 0, 2]
-#
-#     if confidence < 0.5:
-#         return frame
-#
-#     box = detections[0, 0, 0, 3:7] * np.array([w, h, w, h])
-#     (startX, startY, endX, endY) = box.astype("int")
-#     try:
-#         frame = frame[startY:endY, startX:endX]
-#         (h, w) = frame.shape[:2]
-#         r = 480 / float(h)
-#         dim = (int(w * r), 480)
-#         frame = cv2.resize(frame, dim)
-#     except Exception as e:
-#         pass
-#     return frame
-
 def detect_face(frame):
-
-
 
     # Resize frame of video to 1/4 size for faster face recognition processing
     small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
@@ -85,19 +59,14 @@ def detect_face(frame):
         matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
         name = "Unknown"
 
-        # # If a match was found in known_face_encodings, just use the first one.
-        # if True in matches:
-        #     first_match_index = matches.index(True)
-        #     name = known_face_names[first_match_index]
-
         # Or instead, use the known face with the smallest distance to the new face
         face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
         best_match_index = np.argmin(face_distances)
+        # get the recognised name
         if matches[best_match_index]:
             name = known_face_names[best_match_index]
 
-        face_names.append(name)
-        print(frame)
+        face_names.append(str(name))
 
         # Display the results
         for (top, right, bottom, left), name in zip(face_locations, face_names):
@@ -109,12 +78,13 @@ def detect_face(frame):
 
             # Draw a box around the face
             cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-
             # Draw a label with a name below the face
             cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
-            font = cv2.FONT_HERSHEY_DUPLEX
-            cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-    return frame[:,:,::-1]
+            # put name to frame
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(frame, name[:-1], (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+
+    return frame
 
 
 def gen_frames():  # generate frame by frame from camera
@@ -169,11 +139,9 @@ def tasks():
         elif request.form.get('neg') == 'Negative':
             global neg
             neg = not neg
-        elif request.form.get('face') == 'Face Only':
+        elif request.form.get('face') == 'Face':
             global face
             face = not face
-            if (face):
-                time.sleep(4)
         elif request.form.get('stop') == 'Stop/Start':
 
             if (switch == 1):
