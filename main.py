@@ -77,12 +77,14 @@ def detect_face(frame):
             left *= 4
 
             # Draw a box around the face
-            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+            frame=cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
             # Draw a label with a name below the face
-            cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+            frame=cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
             # put name to frame
             font = cv2.FONT_HERSHEY_SIMPLEX
-            cv2.putText(frame, name[:-1], (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+            frame=cv2.putText(frame, name, (left +12, bottom - 6), font, 1.0, (255, 255, 255), 3)
+
+            # frame = cv2.flip(frame,1)
 
     return frame
 
@@ -91,6 +93,7 @@ def gen_frames():  # generate frame by frame from camera
     global out, capture, rec_frame
     while True:
         success, frame = camera.read()
+
         if success:
             if (face):
                 frame = detect_face(frame)
@@ -100,12 +103,12 @@ def gen_frames():  # generate frame by frame from camera
                 frame = cv2.bitwise_not(frame)
             if (capture):
                 capture = 0
-                now = "arthit"
-                p = os.path.sep.join(['images_db', "{}.png".format(str(now).replace(":", ''))])
+                file_name = "arthit"
+                p = os.path.sep.join(['images_db', "{}.png".format(str(file_name))])
                 cv2.imwrite(p, frame)
 
             try:
-                ret, buffer = cv2.imencode('.jpg', cv2.flip(frame, 1))
+                ret, buffer = cv2.imencode('.jpg',frame)
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
@@ -118,16 +121,15 @@ def gen_frames():  # generate frame by frame from camera
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('face_recognition.html')
 
 
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
-@app.route('/requests', methods=['POST', 'GET'])
-def tasks():
+@app.route('/register', methods=['POST', 'GET'])
+def register():
     global switch, camera
     if request.method == 'POST':
         if request.form.get('click') == 'Capture':
@@ -139,7 +141,7 @@ def tasks():
         elif request.form.get('neg') == 'Negative':
             global neg
             neg = not neg
-        elif request.form.get('face') == 'Face':
+        elif request.form.get('face') == 'Face Detection':
             global face
             face = not face
         elif request.form.get('stop') == 'Stop/Start':
@@ -155,12 +157,45 @@ def tasks():
 
 
     elif request.method == 'GET':
-        return render_template('index.html')
-    return render_template('index.html')
+        return render_template('register.html')
+    return render_template('register.html')
+
+
+@app.route('/requests', methods=['POST', 'GET'])
+def tasks():
+    global switch, camera
+    if request.method == 'POST':
+        if request.form.get('click') == 'Capture':
+            global capture
+            capture = 1
+        elif request.form.get('grey') == 'Grey':
+            global grey
+            grey = not grey
+        elif request.form.get('neg') == 'Negative':
+            global neg
+            neg = not neg
+        elif request.form.get('face') == 'Face Detection':
+            global face
+            face = not face
+        elif request.form.get('stop') == 'Stop/Start':
+
+            if (switch == 1):
+                switch = 0
+                camera.release()
+                cv2.destroyAllWindows()
+
+            else:
+                camera = cv2.VideoCapture(0)
+                switch = 1
+
+
+    elif request.method == 'GET':
+        return render_template('face_recognition.html')
+    return render_template('face_recognition.html')
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
 
 camera.release()
 cv2.destroyAllWindows()
