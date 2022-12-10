@@ -1,9 +1,9 @@
 # face_recognition_pea_project
-This project has developed by using Python and HTML.
-there are three main function.
-1. register: Add personal data and facial picture to the database
-2. Face Recognition: using to detecting and recognise the user facials.
-3. Ger Information: Get user information after the algorith recognised facials.
+This project developed by using Python and HTML.
+there are three functions.
+1. Register: Add personal data and facial picture to the database
+2. Face Recognition: detecting and recognising the facials.
+3. Ger Information: To get user information after the algorith recognised.
 ## Instruction
 1. Download the repository by `git clone https://github.com/Arthitkhotsaenlee/face_recognition_pea_project.git`
 2. Move to the directory by `cd face_recognition_pea_project`
