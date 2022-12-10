@@ -222,12 +222,12 @@ def checkInfomation():
         if not result_check.empty:
             show_info_dict = result_check
         else:
-            show_info_dict = pd.DataFrame.from_dict({"Unknown": ["Unknown"]})
+            show_info_dict = pd.DataFrame.from_dict({"Unknown": ["Please add data to the database or capture a clearer photo"]})
         return render_template("chekinfo.html", tables=[show_info_dict.to_html()], titles=[''])
     if not result_check.empty:
         show_info_dict = result_check
     else:
-        show_info_dict = pd.DataFrame.from_dict({"Unknown": ["Unknown"]})
+        show_info_dict = pd.DataFrame.from_dict({"Unknown": ["Please add data to the database or capture a clearer photo"]})
     return render_template("chekinfo.html", tables=[show_info_dict.to_html()], titles=[''])
 
 
