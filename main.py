@@ -146,9 +146,9 @@ def check_info(frame):
         face_names.append(str(name))
         # Display the results
     info_df = pd.DataFrame()
-    for name in face_names:
-        if name != "Unknown":
-            info_df =pd.concat([info_df,know_information[know_information["id"] == name]])
+    for kname in face_names:
+        if kname != "Unknown":
+            info_df = pd.concat([info_df,know_information[know_information["id"] == kname]])
     return info_df
 
 
