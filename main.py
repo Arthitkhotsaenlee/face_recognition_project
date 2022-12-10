@@ -219,9 +219,15 @@ def checkInfomation():
         if request.form.get('back') == 'Back':
             return redirect("/")
     elif request.method == 'GET':
-        show_info_dict = result_check
+        if not result_check.empty:
+            show_info_dict = result_check
+        else:
+            show_info_dict = pd.DataFrame.from_dict({"Unknown": ["Unknown"]})
         return render_template("chekinfo.html", tables=[show_info_dict.to_html()], titles=[''])
-    show_info_dict = result_check
+    if not result_check.empty:
+        show_info_dict = result_check
+    else:
+        show_info_dict = pd.DataFrame.from_dict({"Unknown": ["Unknown"]})
     return render_template("chekinfo.html", tables=[show_info_dict.to_html()], titles=[''])
 
 
