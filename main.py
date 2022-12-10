@@ -98,25 +98,24 @@ def detect_face(frame):
             name = known_face_names[best_match_index]
 
         face_names.append(str(name))
-
-        # Display the results
-        for (top, right, bottom, left), name in zip(face_locations, face_names):
-            # Scale back up face locations since the frame we detected in was scaled to 1/4 size
-            top *= resize_param
-            right *= resize_param
-            bottom *= resize_param
-            left *= resize_param
-            # Draw a box around the face
-            frame = cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-            # Draw a label with a name below the face
-            frame = cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
-            # put name to frame
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            try:
-                mat_name = know_information[know_information["id"] == name]["fname"].values[0]
-            except Exception:
-                mat_name = "Unknow"
-            frame = cv2.putText(frame, mat_name, (left +12, bottom - 6), font, 1.0, (255, 255, 255), 3)
+    # Display the results
+    for (top, right, bottom, left), name in zip(face_locations, face_names):
+        # Scale back up face locations since the frame we detected in was scaled to 1/4 size
+        top *= resize_param
+        right *= resize_param
+        bottom *= resize_param
+        left *= resize_param
+        # Draw a box around the face
+        frame = cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+        # Draw a label with a name below the face
+        frame = cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+        # put name to frame
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        try:
+            mat_name = know_information[know_information["id"] == name]["fname"].values[0]
+        except Exception:
+            mat_name = "Unknow"
+        frame = cv2.putText(frame, mat_name, (left +12, bottom - 6), font, 1.0, (255, 255, 255), 3)
 
     return frame
 
@@ -138,7 +137,6 @@ def check_info(frame):
         # See if the face is a match for the known face(s)
         matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
         name = "Unknown"
-
         # Or instead, use the known face with the smallest distance to the new face
         face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
         best_match_index = np.argmin(face_distances)
@@ -147,8 +145,9 @@ def check_info(frame):
             name = known_face_names[best_match_index]
         face_names.append(str(name))
         # Display the results
-        info_df = pd.DataFrame()
-        for name in  face_names:
+    info_df = pd.DataFrame()
+    for name in face_names:
+        if name != "Unknown":
             info_df =pd.concat([info_df,know_information[know_information["id"] == name]])
     return info_df
 
