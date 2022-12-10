@@ -14,7 +14,7 @@ import pandas as pd
 images_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/images_db"
 info_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/info_db"
 
-global capture, rec_frame, face, out, ima_name, check
+global capture, rec_frame, face, out, ima_name, check, known_face_encodings, known_face_names,know_information
 capture = False
 face = False
 
@@ -32,8 +32,10 @@ camera = cv2.VideoCapture(0)
 
 # import know peoples
 know_list = [i for i in os.listdir(images_DIR)]
+
 known_face_encodings = []
 known_face_names = []
+know_information = []
 
 
 try:
@@ -65,10 +67,9 @@ def write_information(data_df):
 
 
 def detect_face(frame):
-
+    ratio = 1/5
     # Resize frame of video to 1/4 size for faster face recognition processing
-    small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
-
+    small_frame = cv2.resize(frame, (0, 0), fx=ratio, fy=ratio)
     # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
     rgb_small_frame = small_frame[:, :, ::-1]
 
@@ -94,11 +95,10 @@ def detect_face(frame):
         # Display the results
         for (top, right, bottom, left), name in zip(face_locations, face_names):
             # Scale back up face locations since the frame we detected in was scaled to 1/4 size
-            top *= 4
-            right *= 4
-            bottom *= 4
-            left *= 4
-
+            top *= 1/ratio
+            right *= 1/ratio
+            bottom *= 1/ratio
+            left *= 1/ratio
             # Draw a box around the face
             frame = cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
             # Draw a label with a name below the face
@@ -114,7 +114,7 @@ def detect_face(frame):
 def check_info(frame):
 
     # Resize frame of video to 1/4 size for faster face recognition processing
-    small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+    small_frame = cv2.resize(frame, (0, 0), fx=0.2, fy=0.2)
 
     # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
     rgb_small_frame = small_frame[:, :, ::-1]
@@ -135,9 +135,7 @@ def check_info(frame):
         # get the recognised name
         if matches[best_match_index]:
             name = known_face_names[best_match_index]
-
         face_names.append(str(name))
-
         # Display the results
         info_df = pd.DataFrame()
         for name in  face_names:
@@ -236,7 +234,6 @@ def tasks():
             success, frame = camera.read()
             if success:
                 result_check = check_info(frame)
-
             return redirect(url_for("checkInfomation"))
 
     elif request.method == 'GET':
