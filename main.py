@@ -1,6 +1,6 @@
 from flask import Flask, render_template, Response, request, redirect, url_for
 import cv2
-import datetime, time
+import time
 import os, sys
 import numpy as np
 from threading import Thread
@@ -36,11 +36,8 @@ camera = cv2.VideoCapture(0)
 
 # import know peoples
 know_list = [i for i in os.listdir(images_DIR)]
-
 known_face_encodings = []
 known_face_names = []
-know_information = []
-
 for i in know_list:
     try:
         img = []
@@ -51,6 +48,9 @@ for i in know_list:
         known_face_names.append(name)
     except Exception:
         pass
+
+# import know information from database
+know_information = []
 try:
     with open("info_db/information_db.json", "r") as openfile:
         # Reading from json file
@@ -62,6 +62,7 @@ except Exception:
 
 def write_information(data_df):
     try:
+        global know_information
         # Opening JSON file
         with open("info_db/information_db.json", "r") as openfile:
             # Reading from json file
@@ -69,8 +70,11 @@ def write_information(data_df):
         information_df = pd.DataFrame.from_dict(json_object)
         information_df = pd.concat([information_df,data_df], ignore_index=True)
         information_df.to_json(path_or_buf=os.path.join(info_DIR, "information_db.json"))
+        know_information = information_df
     except Exception:
+        know_information = data_df
         data_df.to_json(path_or_buf=os.path.join(info_DIR, "information_db.json"))
+
 
 
 def detect_face(frame):
@@ -88,16 +92,27 @@ def detect_face(frame):
     face_names = []
     for face_encoding in face_encodings:
         # See if the face is a match for the known face(s)
-        matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
-        name = "Unknown"
+        try:
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+        except:
+            matches = face_recognition.compare_faces(known_encodings, face_encoding)
         # Or instead, use the known face with the smallest distance to the new face
-        face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-        best_match_index = np.argmin(face_distances)
+        try:
+            face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+        except:
+            face_distances = face_recognition.face_distance(known_encodings, face_encoding)
+        try:
+            best_match_index = np.argmin(face_distances)
+            if matches[best_match_index]:
+                try:
+                    name = known_face_names[best_match_index]
+                except:
+                    name = known_names[best_match_index]
+            face_names.append(str(name))
+        except:
+             face_names = ["Unknown"]
         # get the recognised name
-        if matches[best_match_index]:
-            name = known_face_names[best_match_index]
 
-        face_names.append(str(name))
     # Display the results
     for (top, right, bottom, left), name in zip(face_locations, face_names):
         # Scale back up face locations since the frame we detected in was scaled to 1/4 size
@@ -121,17 +136,13 @@ def detect_face(frame):
 
 
 def check_info(frame):
-
     # Resize frame of video to 1/4 size for faster face recognition processing
     small_frame = cv2.resize(frame, (0, 0), fx=0.2, fy=0.2)
-
     # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
     rgb_small_frame = small_frame[:, :, ::-1]
-
     # Find all the faces and face encodings in the current frame of video
     face_locations = face_recognition.face_locations(rgb_small_frame)
     face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-
     face_names = []
     for face_encoding in face_encodings:
         # See if the face is a match for the known face(s)
@@ -156,28 +167,43 @@ def gen_frames():  # generate frame by frame from camera
     global capture, rec_frame
     while True:
         success, frame = camera.read()
-
         if success:
             if (face):
                 frame = detect_face(frame)
             elif (capture):
                 capture = 0
                 file_name = primary_key
-                p = os.path.sep.join(['images_db', "{}.png".format(str(file_name))])
+                image_name = "{}.png".format(str(file_name))
+                p = os.path.sep.join(['images_db', image_name])
                 cv2.imwrite(p, frame)
-            elif False:
-                pass
+                try:
+                    pic1 = frame
+                    pic_encode1 = face_recognition.face_encodings(pic1)[0]
+                    name1 = file_name
+                    known_face_encodings.append(pic_encode1)
+                    known_face_names.append(name1)
+                except Exception:
+                    try:
+                        global known_encodings, known_names
+                        if len(known_encodings) < 0 or len(known_names) < 0:
+                            known_encodings = []
+                            known_names = []
+                    except:
+                        known_encodings = []
+                        known_names = []
+                    pic2 = frame
+                    pic_encode2 = face_recognition.face_encodings(pic2)[0]
+                    name2 = file_name
+                    known_encodings.append(pic_encode2)
+                    known_names.append(name2)
 
             try:
                 ret, buffer = cv2.imencode('.jpg',frame)
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            except Exception as e:
+            except Exception:
                 pass
-        else:
-            pass
-
 
 @app.route('/')
 def index():
@@ -242,6 +268,7 @@ def tasks():
             face = not face
 
         elif request.form.get('regis') == 'Register':
+            face = False
             return redirect(url_for("register"))
 
         elif request.form.get('info') == 'Get Information':
