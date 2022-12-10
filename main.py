@@ -11,18 +11,22 @@ import pandas as pd
 
 
 # Path DIR
+"""
+ Here is the path directory session.
+ User may chane it in to sql IP address.
+"""
 images_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/images_db"
 info_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/info_db"
 
-global capture, rec_frame, face, out, ima_name, check, known_face_encodings, known_face_names,know_information
+global capture, face, ima_name, check, known_face_encodings, known_face_names, know_information
 capture = False
 face = False
 
 # make shots directory to save pics
-try:
-    os.mkdir('./images_db')
-except OSError as error:
-    pass
+
+os.makedirs(images_DIR,exist_ok=True)
+os.makedirs(info_DIR,exist_ok=True)
+
 
 # instatiate flask app
 app = Flask(__name__, template_folder='./templates')
@@ -37,14 +41,17 @@ known_face_encodings = []
 known_face_names = []
 know_information = []
 
-
-try:
-    for i in know_list:
+for i in know_list:
+    try:
+        img = []
         img = face_recognition.load_image_file(os.path.join(images_DIR, i))
         img_encode = face_recognition.face_encodings(img)[0]
         name = i.split(".")[0]
         known_face_encodings.append(img_encode)
         known_face_names.append(name)
+    except Exception:
+        pass
+try:
     with open("info_db/information_db.json", "r") as openfile:
         # Reading from json file
         json_info = json.load(openfile)
@@ -61,13 +68,14 @@ def write_information(data_df):
             json_object = json.load(openfile)
         information_df = pd.DataFrame.from_dict(json_object)
         information_df = pd.concat([information_df,data_df], ignore_index=True)
-        information_df.to_json(path_or_buf=os.path.join(info_DIR,"information_db.json"))
+        information_df.to_json(path_or_buf=os.path.join(info_DIR, "information_db.json"))
     except Exception:
         data_df.to_json(path_or_buf=os.path.join(info_DIR, "information_db.json"))
 
 
 def detect_face(frame):
-    ratio = 1/5
+    resize_param = 6
+    ratio = 1/resize_param
     # Resize frame of video to 1/4 size for faster face recognition processing
     small_frame = cv2.resize(frame, (0, 0), fx=ratio, fy=ratio)
     # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
@@ -82,7 +90,6 @@ def detect_face(frame):
         # See if the face is a match for the known face(s)
         matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
         name = "Unknown"
-
         # Or instead, use the known face with the smallest distance to the new face
         face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
         best_match_index = np.argmin(face_distances)
@@ -95,17 +102,20 @@ def detect_face(frame):
         # Display the results
         for (top, right, bottom, left), name in zip(face_locations, face_names):
             # Scale back up face locations since the frame we detected in was scaled to 1/4 size
-            top *= 1/ratio
-            right *= 1/ratio
-            bottom *= 1/ratio
-            left *= 1/ratio
+            top *= resize_param
+            right *= resize_param
+            bottom *= resize_param
+            left *= resize_param
             # Draw a box around the face
             frame = cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
             # Draw a label with a name below the face
             frame = cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
             # put name to frame
             font = cv2.FONT_HERSHEY_SIMPLEX
-            mat_name = know_information[know_information["id"] == name]["fname"].values[0]
+            try:
+                mat_name = know_information[know_information["id"] == name]["fname"].values[0]
+            except Exception:
+                mat_name = "Unknow"
             frame = cv2.putText(frame, mat_name, (left +12, bottom - 6), font, 1.0, (255, 255, 255), 3)
 
     return frame
@@ -144,7 +154,7 @@ def check_info(frame):
 
 
 def gen_frames():  # generate frame by frame from camera
-    global out, capture, rec_frame
+    global capture, rec_frame
     while True:
         success, frame = camera.read()
 
