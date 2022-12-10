@@ -14,12 +14,9 @@ import pandas as pd
 images_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/images_db"
 info_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/info_db"
 
-global capture, rec_frame, grey, switch, neg, face, out, ima_name
-capture = 0
-grey = 0
-neg = 0
-face = 0
-switch = 1
+global capture, rec_frame, face, out, ima_name, check
+capture = False
+face = False
 
 # make shots directory to save pics
 try:
@@ -37,12 +34,22 @@ camera = cv2.VideoCapture(0)
 know_list = [i for i in os.listdir(images_DIR)]
 known_face_encodings = []
 known_face_names = []
-for i in know_list:
-    img = face_recognition.load_image_file(os.path.join(images_DIR,i))
-    img_encode = face_recognition.face_encodings(img)[0]
-    name = i.split(".")[0]
-    known_face_encodings.append(img_encode)
-    known_face_names.append(name)
+
+
+try:
+    for i in know_list:
+        img = face_recognition.load_image_file(os.path.join(images_DIR, i))
+        img_encode = face_recognition.face_encodings(img)[0]
+        name = i.split(".")[0]
+        known_face_encodings.append(img_encode)
+        known_face_names.append(name)
+    with open("info_db/information_db.json", "r") as openfile:
+        # Reading from json file
+        json_info = json.load(openfile)
+    know_information = pd.DataFrame.from_dict(json_info)
+except Exception:
+    pass
+
 
 def write_information(data_df):
     try:
@@ -53,19 +60,8 @@ def write_information(data_df):
         information_df = pd.DataFrame.from_dict(json_object)
         information_df = pd.concat([information_df,data_df], ignore_index=True)
         information_df.to_json(path_or_buf=os.path.join(info_DIR,"information_db.json"))
-        # # Serializing json
-        # json_object = json.dumps(json_data, indent=2)
-        # # Writing to sample.json
-        # with open("info_db/information_db.json", "w") as outfile:
-        #     outfile.write(json_object)
     except Exception:
-        # json_data = data_df.to_json(orient="split")
         data_df.to_json(path_or_buf=os.path.join(info_DIR, "information_db.json"))
-        # # Serializing json
-        # json_object = json.dumps(json_data, indent=2)
-        # # Writing to sample.json
-        # with open("info_db/information_db.json", "w") as outfile:
-        #     outfile.write(json_object)
 
 
 def detect_face(frame):
@@ -104,16 +100,49 @@ def detect_face(frame):
             left *= 4
 
             # Draw a box around the face
-            frame=cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+            frame = cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
             # Draw a label with a name below the face
-            frame=cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+            frame = cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
             # put name to frame
             font = cv2.FONT_HERSHEY_SIMPLEX
-            frame=cv2.putText(frame, name, (left +12, bottom - 6), font, 1.0, (255, 255, 255), 3)
-
-            # frame = cv2.flip(frame,1)
+            mat_name = know_information[know_information["id"] == name]["fname"].values[0]
+            frame = cv2.putText(frame, mat_name, (left +12, bottom - 6), font, 1.0, (255, 255, 255), 3)
 
     return frame
+
+
+def check_info(frame):
+
+    # Resize frame of video to 1/4 size for faster face recognition processing
+    small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+
+    # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+    rgb_small_frame = small_frame[:, :, ::-1]
+
+    # Find all the faces and face encodings in the current frame of video
+    face_locations = face_recognition.face_locations(rgb_small_frame)
+    face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
+
+    face_names = []
+    for face_encoding in face_encodings:
+        # See if the face is a match for the known face(s)
+        matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+        name = "Unknown"
+
+        # Or instead, use the known face with the smallest distance to the new face
+        face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+        best_match_index = np.argmin(face_distances)
+        # get the recognised name
+        if matches[best_match_index]:
+            name = known_face_names[best_match_index]
+
+        face_names.append(str(name))
+
+        # Display the results
+        info_df = pd.DataFrame()
+        for name in  face_names:
+            info_df =pd.concat([info_df,know_information[know_information["id"] == name]])
+    return info_df
 
 
 def gen_frames():  # generate frame by frame from camera
@@ -129,6 +158,8 @@ def gen_frames():  # generate frame by frame from camera
                 file_name = primary_key
                 p = os.path.sep.join(['images_db', "{}.png".format(str(file_name))])
                 cv2.imwrite(p, frame)
+            elif False:
+                pass
 
             try:
                 ret, buffer = cv2.imencode('.jpg',frame)
@@ -137,7 +168,6 @@ def gen_frames():  # generate frame by frame from camera
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
             except Exception as e:
                 pass
-
         else:
             pass
 
@@ -146,14 +176,13 @@ def gen_frames():  # generate frame by frame from camera
 def index():
     return render_template('face_recognition.html')
 
-
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
-    global switch, camera
+    global camera
     if request.method == 'POST':
         if request.form.get('click') == 'Capture':
             global capture, primary_key
@@ -166,32 +195,49 @@ def register():
                 "email": [request.form.get("email")],
                 "phone": [request.form.get("phone")],
             }
-            print(reg_dict["fname"])
-            if True:
+            if len(reg_dict["fname"]) > 0:
                 reg_df = pd.DataFrame.from_dict(reg_dict)
                 write_information(reg_df)
                 capture = 1
-
-
         elif request.form.get('back') == 'Back':
             return redirect("/")
-
-
     elif request.method == 'GET':
         return render_template('register.html')
     return render_template('register.html')
 
 
+@app.route("/checkInfomation", methods=['POST', 'GET'])
+def checkInfomation():
+    if request.method == 'POST':
+        if request.form.get('back') == 'Back':
+            return redirect("/")
+    elif request.method == 'GET':
+        show_info_dict = result_check
+        return render_template("chekinfo.html", tables=[show_info_dict.to_html()], titles=[''])
+    show_info_dict = result_check
+    return render_template("chekinfo.html", tables=[show_info_dict.to_html()], titles=[''])
+
+
+
 @app.route('/requests', methods=['POST', 'GET'])
 def tasks():
-    global switch, camera
+    global camera
     if request.method == 'POST':
-        if request.form.get('face') == 'Start/Stop Scan':
+
+        if request.form.get('face') == 'Face Recognition':
             global face
             face = not face
+
         elif request.form.get('regis') == 'Register':
             return redirect(url_for("register"))
 
+        elif request.form.get('info') == 'Get Information':
+            global result_check
+            success, frame = camera.read()
+            if success:
+                result_check = check_info(frame)
+
+            return redirect(url_for("checkInfomation"))
 
     elif request.method == 'GET':
         return render_template('face_recognition.html')

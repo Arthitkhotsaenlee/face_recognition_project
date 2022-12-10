@@ -19,11 +19,10 @@
             <h1 class="mt-5">Face Recognition</h1>
 			<form method="post" action="{{ url_for('tasks') }}">
                 <input type="submit" value="Register" name="regis" />
-			    <input type="submit" value="Start/Stop Scan" name="face" />
+			    <input type="submit" value="Face Recognition" name="face" />
                 <input type="submit" value="Get Information" name="info">
 			</form>
             <img src="{{ url_for('video_feed') }}" height="50%">
-
         </div>
     </div>
 </div>
