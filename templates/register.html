@@ -1,9 +1,22 @@
-
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="Register data"
+		  content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Registation</title>
+	<style>
+		img{
+			width: 500px;
+		}
+	</style>
+</head>
 <body>
 <div class="container">
     <div class="row">
         <div class="col-lg-8  offset-lg-2">
-            <h2 class="mt-5">Registation</h2>
+            <h1 class="mt-5">Registation</h1>
 			<form method="post" action="{{ url_for('register') }}">
 			<label for="fname">First name:</label>
 			<input type="text" id="fname" name="fname"><br><br>
@@ -13,23 +26,18 @@
 			<input type="date" id="bday" name="bday"><br><br>
 			<label for="email">Email:</label>
 			<input type="email" id="email" name="email"><br><br>
-			<input type="submit" value="Submit">
+			<label for="phone">Phone number:</label>
+			<input type="number" id="phone" name="phone"><br><br>
+            <img src="{{ url_for('video_feed') }}" height="80%">
 			<input type="submit" value="Capture" name="click"/>
 			<input type="submit" value="Back" name="back">
 			</form>
-            <img src="{{ url_for('video_feed') }}" height="80%">
-<!--			<h3 style="font-family:courier;">Instructions:</h3>-->
-<!--			<ol style="font-family:courier;">-->
-<!--			<li>Stop/Start&#45;&#45;Toggle between stop or start live streaming</li>-->
-<!--			<li>Capture&#45;&#45;Take still-shot and save in the 'shots' directory</li>-->
-<!--			<li>Grey&#45;&#45;Toggle between grayscale and RGB output</li>-->
-<!--			<li>Negative&#45;&#45;Toggle between negative and RGB output</li>-->
-<!--			<li>Face Only&#45;&#45;Shows just your face if present(Toggle on/off)</li>-->
-<!--			<li>Start/Stop Recording&#45;&#45;Toggle between starting and stopping video recording</li> </ol>-->
         </div>
     </div>
 </div>
-			<div class="topnav">
-			<a class="active" href="http://127.0.0.1:5000/">Back to Home</a>
-			</div>
+<!--			<div class="topnav">-->
+<!--			<a class="active" href="http://127.0.0.1:5000/">Back to Home</a>-->
+<!--			</div>-->
+
 </body>
+</html>

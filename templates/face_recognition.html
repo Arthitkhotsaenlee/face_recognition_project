@@ -1,17 +1,32 @@
-
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="Face recognition app"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title > Face recognition app</title>
+    <style>
+        img{
+            width: 1000px
+        }
+    </style>
+</head>
 <body>
 <div class="container">
     <div class="row">
         <div class="col-lg-8  offset-lg-2">
-
-            <h2 class="mt-5">Face Recognition</h2>
+            <h1 class="mt-5">Face Recognition</h1>
 			<form method="post" action="{{ url_for('tasks') }}">
-            <input type="submit" value="Register" name="regis" />
-			<input type="submit" value="Start/Stop Scan" name="face" />
+                <input type="submit" value="Register" name="regis" />
+			    <input type="submit" value="Start/Stop Scan" name="face" />
+                <input type="submit" value="Get Information" name="info">
 			</form>
-            <img src="{{ url_for('video_feed') }}" height="80%">
+            <img src="{{ url_for('video_feed') }}" height="50%">
 
         </div>
     </div>
 </div>
+
 </body>
+</html>

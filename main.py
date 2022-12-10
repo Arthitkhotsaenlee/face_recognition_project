@@ -4,7 +4,11 @@ import datetime, time
 import os, sys
 import numpy as np
 from threading import Thread
+import json
 import face_recognition
+import uuid
+import pandas as pd
+
 
 # Path DIR
 images_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/images_db"
@@ -39,6 +43,29 @@ for i in know_list:
     name = i.split(".")[0]
     known_face_encodings.append(img_encode)
     known_face_names.append(name)
+
+def write_information(data_df):
+    try:
+        # Opening JSON file
+        with open("info_db/information_db.json", "r") as openfile:
+            # Reading from json file
+            json_object = json.load(openfile)
+        information_df = pd.DataFrame.from_dict(json_object)
+        information_df = pd.concat([information_df,data_df], ignore_index=True)
+        information_df.to_json(path_or_buf=os.path.join(info_DIR,"information_db.json"))
+        # # Serializing json
+        # json_object = json.dumps(json_data, indent=2)
+        # # Writing to sample.json
+        # with open("info_db/information_db.json", "w") as outfile:
+        #     outfile.write(json_object)
+    except Exception:
+        # json_data = data_df.to_json(orient="split")
+        data_df.to_json(path_or_buf=os.path.join(info_DIR, "information_db.json"))
+        # # Serializing json
+        # json_object = json.dumps(json_data, indent=2)
+        # # Writing to sample.json
+        # with open("info_db/information_db.json", "w") as outfile:
+        #     outfile.write(json_object)
 
 
 def detect_face(frame):
@@ -97,13 +124,9 @@ def gen_frames():  # generate frame by frame from camera
         if success:
             if (face):
                 frame = detect_face(frame)
-            if (grey):
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            if (neg):
-                frame = cv2.bitwise_not(frame)
-            if (capture):
+            elif (capture):
                 capture = 0
-                file_name = ima_name
+                file_name = primary_key
                 p = os.path.sep.join(['images_db', "{}.png".format(str(file_name))])
                 cv2.imwrite(p, frame)
 
@@ -133,28 +156,25 @@ def register():
     global switch, camera
     if request.method == 'POST':
         if request.form.get('click') == 'Capture':
-            global capture, ima_name
-            ima_name = request.form.get("fname")
-            if len(ima_name)>0:
+            global capture, primary_key
+            primary_key = str(uuid.uuid4())
+            reg_dict = {
+                "id": [primary_key],
+                "fname":[request.form.get("fname")],
+                "lname": [request.form.get("lname")],
+                "bday": [request.form.get("bday")],
+                "email": [request.form.get("email")],
+                "phone": [request.form.get("phone")],
+            }
+            print(reg_dict["fname"])
+            if True:
+                reg_df = pd.DataFrame.from_dict(reg_dict)
+                write_information(reg_df)
                 capture = 1
+
+
         elif request.form.get('back') == 'Back':
             return redirect("/")
-        elif request.form.get('neg') == 'Negative':
-            global neg
-            neg = not neg
-        elif request.form.get('face') == 'Face Detection':
-            global face
-            face = not face
-        elif request.form.get('stop') == 'Stop/Start':
-
-            if (switch == 1):
-                switch = 0
-                camera.release()
-                cv2.destroyAllWindows()
-
-            else:
-                camera = cv2.VideoCapture(0)
-                switch = 1
 
 
     elif request.method == 'GET':
