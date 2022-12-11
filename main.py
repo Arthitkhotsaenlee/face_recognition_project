@@ -72,7 +72,6 @@ def write_information(data_df):
         data_df.to_json(path_or_buf=os.path.join(info_DIR, "information_db.json"))
 
 
-
 def detect_face(frame,known_face_encodings,known_face_names):
     resize_param = 6
     ratio = 1/resize_param
@@ -217,17 +216,24 @@ def register():
 
 @app.route("/checkInfomation", methods=['POST', 'GET'])
 def checkInfomation():
+    map_columna_name = {
+        "id": "UserID",
+        "fname": "First Name",
+        "lname": "Last Name",
+        "email": "Email",
+        "phone": "Phone number"
+    }
     if request.method == 'POST':
         if request.form.get('back') == 'Back':
             return redirect("/")
     elif request.method == 'GET':
         if not result_check.empty:
-            show_info_dict = result_check
+            show_info_dict = result_check.rename(map_columna_name,axis="columns")
         else:
             show_info_dict = pd.DataFrame.from_dict({"Unknown": ["Please add data to the database or capture a clearer photo"]})
         return render_template("chekinfo.html", tables=[show_info_dict.to_html()], titles=[''])
     if not result_check.empty:
-        show_info_dict = result_check
+        show_info_dict = result_check.rename(map_columna_name,axis="columns")
     else:
         show_info_dict = pd.DataFrame.from_dict({"Unknown": ["Please add data to the database or capture a clearer photo"]})
     return render_template("chekinfo.html", tables=[show_info_dict.to_html()], titles=[''])
@@ -248,6 +254,7 @@ def tasks():
             return redirect(url_for("register"))
 
         elif request.form.get('info') == 'Get Information':
+            face = False
             global result_check
             success, frame = camera.read()
             if success:
