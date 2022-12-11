@@ -73,6 +73,7 @@ def write_information(data_df):
 
 
 def detect_face(frame,known_face_encodings,known_face_names):
+    threshold = 0.4
     resize_param = 10
     ratio = 1/resize_param
     # Resize frame of video to 1/4 size for faster face recognition processing
@@ -92,7 +93,7 @@ def detect_face(frame,known_face_encodings,known_face_names):
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
             best_match_index = np.argmin(face_distances)
             # if matches[best_match_index]:
-            if best_match_index < 0.3:
+            if best_match_index < threshold:  # faster
                 name = known_face_names[best_match_index]
                 face_names.append(str(name))
             else:
