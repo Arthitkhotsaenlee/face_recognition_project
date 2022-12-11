@@ -83,7 +83,6 @@ def detect_face(frame,known_face_encodings,known_face_names):
     # Find all the faces and face encodings in the current frame of video
     face_locations = face_recognition.face_locations(rgb_small_frame)
     face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-
     face_names = []
     for face_encoding in face_encodings:
         try:
