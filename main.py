@@ -73,7 +73,7 @@ def write_information(data_df):
 
 
 def detect_face(frame,known_face_encodings,known_face_names):
-    resize_param = 6
+    resize_param = 10
     ratio = 1/resize_param
     # Resize frame of video to 1/4 size for faster face recognition processing
     small_frame = cv2.resize(frame, (0, 0), fx=ratio, fy=ratio)
@@ -87,11 +87,12 @@ def detect_face(frame,known_face_encodings,known_face_names):
     for face_encoding in face_encodings:
         try:
             # See if the face is a match for the known face(s)
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+            # matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
             # Or instead, use the known face with the smallest distance to the new face
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
             best_match_index = np.argmin(face_distances)
-            if matches[best_match_index]:
+            # if matches[best_match_index]:
+            if best_match_index < 0.4:
                 name = known_face_names[best_match_index]
             face_names.append(str(name))
         except Exception:
