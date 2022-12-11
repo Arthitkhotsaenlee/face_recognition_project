@@ -96,7 +96,7 @@ def detect_face(frame,known_face_encodings,known_face_names):
                 name = known_face_names[best_match_index]
             face_names.append(str(name))
         except Exception:
-            face_names.append(["Unknown"])
+            face_names.append("Unknown")
         # get the recognised name
 
     # Display the results
