@@ -1,14 +1,11 @@
 from flask import Flask, render_template, Response, request, redirect, url_for
 import cv2
-import time
-import os, sys
+import os
 import numpy as np
-from threading import Thread
 import json
 import face_recognition
 import uuid
 import pandas as pd
-
 
 # Path DIR
 """
@@ -18,7 +15,6 @@ import pandas as pd
 images_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/images_db"
 info_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/info_db"
 
-global capture, face, ima_name, check, known_face_encodings, known_face_names, know_information
 capture = False
 face = False
 
@@ -77,7 +73,7 @@ def write_information(data_df):
 
 
 
-def detect_face(frame):
+def detect_face(frame,known_face_encodings,known_face_names):
     resize_param = 6
     ratio = 1/resize_param
     # Resize frame of video to 1/4 size for faster face recognition processing
@@ -91,26 +87,17 @@ def detect_face(frame):
 
     face_names = []
     for face_encoding in face_encodings:
-        # See if the face is a match for the known face(s)
         try:
+            # See if the face is a match for the known face(s)
             matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
-        except:
-            matches = face_recognition.compare_faces(known_encodings, face_encoding)
-        # Or instead, use the known face with the smallest distance to the new face
-        try:
+            # Or instead, use the known face with the smallest distance to the new face
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-        except:
-            face_distances = face_recognition.face_distance(known_encodings, face_encoding)
-        try:
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
-                try:
-                    name = known_face_names[best_match_index]
-                except:
-                    name = known_names[best_match_index]
+                name = known_face_names[best_match_index]
             face_names.append(str(name))
-        except:
-             face_names = ["Unknown"]
+        except Exception:
+            face_names.append(["Unknown"])
         # get the recognised name
 
     # Display the results
@@ -145,16 +132,19 @@ def check_info(frame):
     face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
     face_names = []
     for face_encoding in face_encodings:
-        # See if the face is a match for the known face(s)
-        matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
-        name = "Unknown"
-        # Or instead, use the known face with the smallest distance to the new face
-        face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-        best_match_index = np.argmin(face_distances)
-        # get the recognised name
-        if matches[best_match_index]:
-            name = known_face_names[best_match_index]
-        face_names.append(str(name))
+        try:
+            # See if the face is a match for the known face(s)
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+            name = "Unknown"
+            # Or instead, use the known face with the smallest distance to the new face
+            face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+            best_match_index = np.argmin(face_distances)
+            # get the recognised name
+            if matches[best_match_index]:
+                name = known_face_names[best_match_index]
+            face_names.append(str(name))
+        except Exception:
+            face_names.append(["Unknow"])
         # Display the results
     info_df = pd.DataFrame()
     for kname in face_names:
@@ -164,40 +154,26 @@ def check_info(frame):
 
 
 def gen_frames():  # generate frame by frame from camera
-    global capture, rec_frame
+    global capture, known_face_encodings, known_face_names
     while True:
         success, frame = camera.read()
         if success:
             if (face):
-                frame = detect_face(frame)
+                frame = detect_face(frame,known_face_encodings,known_face_names)
             elif (capture):
                 capture = 0
                 file_name = primary_key
                 image_name = "{}.png".format(str(file_name))
                 p = os.path.sep.join(['images_db', image_name])
                 cv2.imwrite(p, frame)
-                try:
-                    pic1 = frame
-                    pic_encode1 = face_recognition.face_encodings(pic1)[0]
-                    name1 = file_name
-                    known_face_encodings.append(pic_encode1)
-                    known_face_names.append(name1)
-                except Exception:
-                    try:
-                        global known_encodings, known_names
-                        if len(known_encodings) < 0 or len(known_names) < 0:
-                            known_encodings = []
-                            known_names = []
-                    except:
-                        known_encodings = []
-                        known_names = []
-                    pic2 = frame
-                    pic_encode2 = face_recognition.face_encodings(pic2)[0]
-                    name2 = file_name
-                    known_encodings.append(pic_encode2)
-                    known_names.append(name2)
+                pic1 = frame
+                pic_encode1 = face_recognition.face_encodings(pic1)[0]
+                name1 = file_name
+                known_face_encodings.append(pic_encode1)
+                known_face_names.append(name1)
 
             try:
+                # show streaming video
                 ret, buffer = cv2.imencode('.jpg',frame)
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
