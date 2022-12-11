@@ -92,11 +92,13 @@ def detect_face(frame,known_face_encodings,known_face_names):
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
             best_match_index = np.argmin(face_distances)
             # if matches[best_match_index]:
-            if best_match_index < 0.4:
+            if best_match_index < 0.3:
                 name = known_face_names[best_match_index]
-            face_names.append(str(name))
+                face_names.append(str(name))
+            else:
+                face_names.append("Unknown")
         except Exception:
-            face_names.append(["Unknown"])
+            face_names.append("Unknown")
         # get the recognised name
 
     # Display the results
