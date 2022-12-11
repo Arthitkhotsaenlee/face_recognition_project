@@ -13,3 +13,6 @@ there are three functions.
 4. Active the environment with ` conda activate face_recognition_pea_project`
 5. run the scripy `python3 main.py`
 6. Inorder to stop press `CTRL + C`
+## Further Improvements
+1. Add the check attendance function.
+2. Verify Humans by using eye brink detection model.
