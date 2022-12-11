@@ -12,8 +12,8 @@ import pandas as pd
  Here is the path directory session.
  User may chane it in to sql IP address.
 """
-images_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/images_db"
-info_DIR = "/Users/arthitkhotsaenlee/pythonProject/face_recognition_pea_project/info_db"
+images_DIR = "images_db"
+info_DIR = "info_db"
 
 capture = False
 face = False
@@ -267,7 +267,6 @@ def tasks():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
+    app.run()
 camera.release()
 cv2.destroyAllWindows()
