@@ -6,6 +6,7 @@ dependencies:
   - bzip2=1.0.8
   - ca-certificates=2022.12.7
   - certifi=2022.12.7
+  - dlib=19.24.0
   - llvm-openmp=15.0.6
   - numpy=1.23.5
   - openssl=1.1.1s
@@ -21,7 +22,6 @@ dependencies:
   - zlib=1.2.13
   - pip:
     - click==8.1.3
-    - dlib
     - cmake==3.25.0
     - face-recognition==1.3.0
     - face-recognition-models==0.3.0
