@@ -20,8 +20,8 @@ face = False
 
 # make shots directory to save pics
 
-os.makedirs(images_DIR,exist_ok=True)
-os.makedirs(info_DIR,exist_ok=True)
+os.makedirs(images_DIR, exist_ok=True)
+os.makedirs(info_DIR, exist_ok=True)
 
 
 # instatiate flask app
