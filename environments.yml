@@ -8,7 +8,6 @@ dependencies:
   - pip=22.2.2
   - python=3.10.8
   - python_abi=3.10
-  - readline=8.2
   - setuptools=65.5.0
   - sqlite=3.40.0
   - tk=8.6.12
