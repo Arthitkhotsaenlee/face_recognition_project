@@ -1,18 +1,37 @@
 name: face_recognition_pea_project
 channels:
-  - defaults
   - conda-forge
-  - anaconda
+  - defaults
 dependencies:
-  - python=3.10.8
-  - pip=22.2.2
-  - cmake=3.22.1
-  - dlib=19.24.0
-  - numpy=1.23.5
-  - pandas=1.5.2
-  - face_recognition=1.3.0
-  - flask=2.1.3
-
+  - dlib=19.24.0=py310hb2cc84e_0
+  - numpy=1.23.5=py310h1b7c290_0
+  - openssl=1.1.1s=hfd90126_1
+  - pip=22.2.2=py310hecd8cb5_0
+  - python=3.10.8=h218abb5_1
+  - python_abi=3.10=2_cp310
+  - readline=8.2=hca72f7f_0
+  - setuptools=65.5.0=py310hecd8cb5_0
+  - sqlite=3.40.0=h880c91c_0
+  - tk=8.6.12=h5d9f67b_0
+  - tzdata=2022g=h04d1e81_0
+  - wheel=0.37.1=pyhd3eb1b0_0
+  - xz=5.2.8=h6c40b1e_0
+  - zlib=1.2.13=h4dc903c_0
   - pip:
+    - click==8.1.3
+    - cmake==3.25.0
+    - face-recognition==1.3.0
+    - face-recognition-models==0.3.0
+    - flask==2.2.2
+    - itsdangerous==2.1.2
+    - jinja2==3.1.2
+    - joblib==1.2.0
+    - markupsafe==2.1.1
     - opencv-python==4.6.0.66
+    - pandas==1.5.2
+    - pillow==9.3.0
+    - python-dateutil==2.8.2
+    - pytz==2022.6
+    - six==1.16.0
+    - werkzeug==2.2.2
 prefix: /Users/arthitkhotsaenlee/opt/anaconda3/envs/face_recognition_pea_project
