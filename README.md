@@ -8,7 +8,7 @@ there are three functions.
 1. Download the repository by `git clone https://github.com/Arthitkhotsaenlee/face_recognition_pea_project.git`
 2. Move to the directory by `cd ../face_recognition_pea_project`
 3. Create the environment using anaconda`conda env create --name face_recognition_project -f environments.yml`
-4.Active the environment with `conda activate face_recognition_project`
+4. Active the environment with `conda activate face_recognition_project`
 5. run the scripy `python3 main.py`
 6. Inorder to stop press `CTRL + C`
 ## Further Improvements
