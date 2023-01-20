@@ -14,3 +14,4 @@ there are three functions.
 ## Further Improvements
 1. Add the check attendance function.
 2. Verify Humans by using eye brink detection model.
+3. add CR something ref https://tutorial101.blogspot.com/2021/07/add-remove-input-fields-dynamically_24.html
