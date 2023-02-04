@@ -151,7 +151,9 @@ def check_info(frame):
     info_df = pd.DataFrame()
     for kname in face_names:
         if kname != "Unknown":
-            info_df = pd.concat([info_df,know_information[know_information["id"] == kname]])
+            id = know_information[know_information["uuid"] == kname]["id"].values
+            info = know_information[know_information["id"] == id[0]]
+            info_df = pd.concat([info_df,info])
     return info_df
 
 
@@ -199,17 +201,22 @@ def register():
             global capture, primary_key
             primary_key = str(uuid.uuid4())
             reg_dict = {
-                "id": [primary_key],
-                "fname":[request.form.get("fname")],
+                "ca": request.form.getlist('ca_field[]'),
+                "address": request.form.get("add_field[]"),
+            }
+            info_dict = {
+                "uuid": [primary_key],
+                "id": [request.form.get("idcode")],
+                "fname": [request.form.get("fname")],
                 "lname": [request.form.get("lname")],
                 "bday": [request.form.get("bday")],
                 "email": [request.form.get("email")],
                 "phone": [request.form.get("phone")],
-                "address":[request.form.get("address")],
-                "CA": [request.form.get("field[]")],
             }
-            if len(reg_dict["fname"]) > 0:
+            if len(reg_dict["ca"]) > 0:
                 reg_df = pd.DataFrame.from_dict(reg_dict)
+                for key, val in info_dict.items():
+                    reg_df[key] = val[0]
                 write_information(reg_df)
                 capture = 1
         elif request.form.get('back') == 'Back':
@@ -226,19 +233,24 @@ def checkInfomation():
         "fname": "First Name",
         "lname": "Last Name",
         "email": "Email",
-        "phone": "Phone number"
+        "phone": "Phone number",
+        "ca": "CA",
+        "address": "Home Address",
     }
+    table_order =[i for i in map_columna_name.values()]
     if request.method == 'POST':
         if request.form.get('back') == 'Back':
             return redirect("/")
     elif request.method == 'GET':
         if not result_check.empty:
             show_info_dict = result_check.rename(map_columna_name,axis="columns")
+            show_info_dict = show_info_dict[table_order]
         else:
             show_info_dict = pd.DataFrame.from_dict({"Unknown": ["Please add data to the database or capture a clearer photo"]})
         return render_template("chekinfo.html", tables=[show_info_dict.to_html()], titles=[''])
     if not result_check.empty:
         show_info_dict = result_check.rename(map_columna_name,axis="columns")
+        show_info_dict = show_info_dict[table_order]
     else:
         show_info_dict = pd.DataFrame.from_dict({"Unknown": ["Please add data to the database or capture a clearer photo"]})
     return render_template("chekinfo.html", tables=[show_info_dict.to_html()], titles=[''])
