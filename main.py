@@ -205,6 +205,8 @@ def register():
                 "bday": [request.form.get("bday")],
                 "email": [request.form.get("email")],
                 "phone": [request.form.get("phone")],
+                "address":[request.form.get("address")],
+                "CA": [request.form.get("field[]")],
             }
             if len(reg_dict["fname"]) > 0:
                 reg_df = pd.DataFrame.from_dict(reg_dict)
