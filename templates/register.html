@@ -42,9 +42,9 @@ content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=
 			<label for="phone">Phone number:</label>
 			<input type="number" id="phone" name="phone"><br><br>
 			<label for="ca">CA: </label>
-            <input type="text" name="ca_field[]" value=""/>
+            <input type="text" id="ca" name="ca_field[]" value=""/>
 			<label for="address">Address: </label>
-            <input type="text" name="add_field[]" value=""/>
+            <input type="text" id="address" name="add_field[]" value=""/>
             <a href="javascript:void(0);" class="add-input" title="Add input">
 				<img src="/static/add.png"width="20" height="20"/></a>
         </div>
@@ -55,8 +55,10 @@ $(document).ready(function(){
     var max_input_fields = 10;
     var add_input = $('.add-input');
     var input_wrapper = $('.input-wrapper');
-    var new_input = '<div><label for="ca">CA: </label><input type="text" name="ca_field[]" value=""/>' +
-			'<label for="address">Address: </label><input type="text" name="add_field[]" value=""/>'+
+    var new_input = '<div><label for="ca">CA: </label>' +
+			'<input type="text" id="ca" name="ca_field[]" value=""/>' +
+			'<label for="address">Address: </label>' +
+			'<input type="text" id="address" name="add_field[]" value=""/>'+
 			'<a href="javascript:void(0);" class="remove-input" title="Remove input">' +
 			'<img src="/static/remove.png"width="20" height="20"/></a>' +
 			'</div>';

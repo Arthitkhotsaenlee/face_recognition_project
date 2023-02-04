@@ -73,7 +73,7 @@ def write_information(data_df):
 
 
 def detect_face(frame,known_face_encodings,known_face_names):
-    threshold = 0.4
+    threshold = 0.6
     resize_param = 10
     ratio = 1/resize_param
     # Resize frame of video to 1/4 size for faster face recognition processing
@@ -116,7 +116,7 @@ def detect_face(frame,known_face_encodings,known_face_names):
         # put name to frame
         font = cv2.FONT_HERSHEY_SIMPLEX
         try:
-            mat_name = know_information[know_information["id"] == name]["fname"].values[0]
+            mat_name = know_information[know_information["uuid"] == name]["id"].values[0]
         except Exception:
             mat_name = "Unknow"
         frame = cv2.putText(frame, mat_name, (left +12, bottom - 6), font, 1.0, (255, 255, 255), 3)
