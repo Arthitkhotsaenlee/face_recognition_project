@@ -1,4 +1,4 @@
-# face_recognition_pea_project
+# face_recognition_project
 This project developed by using Python and HTML.
 there are three functions.
 1. Register: Add personal data and facial picture to the database
